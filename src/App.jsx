@@ -5,15 +5,15 @@ const STYLES = `
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
 
 :root {
-  --color-primary: #1a7a7a;
-  --color-secondary: #e8735a;
+  --color-primary: #e8735a;
+  --color-secondary: #1a7a7a;
   --color-background: #faf8f5;
   --color-surface: #ffffff;
   --color-text: #2d2d2d;
   --color-text-light: #6b6b6b;
   --color-border: #e0dbd5;
-  --color-primary-light: #e8f4f4;
-  --color-secondary-light: #fdf0ed;
+  --color-primary-light: #fdf0ed;
+  --color-secondary-light: #e8f4f4;
   --color-error: #c0392b;
   --color-success: #27ae60;
   --radius: 12px;
@@ -101,8 +101,8 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; b
 .badge-visited { background:#e8f8ee; color:var(--color-success); }
 .badge-wishlist { background:var(--color-secondary-light); color:var(--color-secondary); }
 .badge-active { background:#e8f8ee; color:var(--color-success); }
-.badge-canceled { background:#fdf0ed; color:var(--color-secondary); }
-.badge-trialing { background:var(--color-primary-light); color:var(--color-primary); }
+.badge-canceled { background:var(--color-primary-light); color:var(--color-primary); }
+.badge-trialing { background:var(--color-secondary-light); color:var(--color-secondary); }
 
 /* Stars */
 .star-rating { display:flex; gap:.15rem; }
@@ -196,7 +196,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; b
 .notif-preview { background:var(--color-primary-light); border-radius:var(--radius-sm); padding:.75rem 1rem; font-size:.85rem; margin-top:.5rem; color:var(--color-primary); }
 .notif-status-badge { display:inline-flex; align-items:center; gap:.4rem; font-size:.78rem; font-weight:600; padding:.2rem .6rem; border-radius:99px; }
 .notif-status-enabled { background:#e8f8ee; color:var(--color-success); }
-.notif-status-disabled { background:var(--color-secondary-light); color:var(--color-secondary); }
+.notif-status-disabled { background:var(--color-primary-light); color:var(--color-primary); }
 .digest-row { display:flex; align-items:center; gap:.75rem; flex-wrap:wrap; margin-top:.5rem; }
 
 /* Pricing / Payments */
@@ -248,56 +248,31 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; b
 `;
 
 // ---- Analytics ----
-// PostHog is used for analytics. Set your PostHog project API key and host below.
-// Get your key at https://app.posthog.com — it's free for up to 1M events/month.
-const POSTHOG_KEY = ""; // e.g. "phc_XXXXXX"
+const POSTHOG_KEY = "";
 const POSTHOG_HOST = "https://app.posthog.com";
 
-// In-memory event store for the built-in dashboard (always active regardless of PostHog config)
 const _analyticsEvents = [];
 
 function trackEvent(eventName, properties = {}) {
-  // Record locally for the built-in dashboard
   _analyticsEvents.push({ name: eventName, ts: Date.now(), ...properties });
-
-  // Forward to PostHog if configured
   if (POSTHOG_KEY && window._posthog) {
-    try {
-      window._posthog.capture(eventName, properties);
-    } catch (_) {}
+    try { window._posthog.capture(eventName, properties); } catch (_) {}
   }
 }
 
-// Load PostHog script lazily (only if key is configured)
 function initPostHog() {
   if (!POSTHOG_KEY || window._posthog) return;
   try {
-    // Inline PostHog snippet (no npm import required)
     (function (t, e) {
       var o, n, p, r;
       e.__SV || (
-        window.posthog = e,
-        e._i = [],
-        e.init = function (i, s, a) {
-          function g(t, e) {
-            var o = e.split(".");
-            2 === o.length && (t = t[o[0]], e = o[1]);
-            t[e] = function () { t.push([e].concat(Array.prototype.slice.call(arguments, 0))); };
-          }
-          (p = t.createElement("script")).type = "text/javascript";
-          p.async = !0;
-          p.src = s.api_host + "/static/array.js";
-          (r = t.getElementsByTagName("script")[0]).parentNode.insertBefore(p, r);
-          var u = e;
-          void 0 !== a ? u = e[a] = [] : a = "posthog";
-          u.people = u.people || [];
-          u.toString = function (t) { var e = "posthog"; return "posthog" !== a && (e += "." + a), t || (e += " (stub)"), e; };
-          u.people.toString = function () { return u.toString(1) + ".people (stub)"; };
+        window.posthog = e, e._i = [], e.init = function (i, s, a) {
+          function g(t, e) { var o = e.split("."); 2 === o.length && (t = t[o[0]], e = o[1]); t[e] = function () { t.push([e].concat(Array.prototype.slice.call(arguments, 0))); }; }
+          (p = t.createElement("script")).type = "text/javascript"; p.async = !0; p.src = s.api_host + "/static/array.js"; (r = t.getElementsByTagName("script")[0]).parentNode.insertBefore(p, r);
+          var u = e; void 0 !== a ? u = e[a] = [] : a = "posthog"; u.people = u.people || []; u.toString = function (t) { var e = "posthog"; return "posthog" !== a && (e += "." + a), t || (e += " (stub)"), e; }; u.people.toString = function () { return u.toString(1) + ".people (stub)"; };
           o = "capture identify alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures getActiveMatchingSurveys getSurveys onSessionId".split(" ");
-          for (n = 0; n < o.length; n++) g(u, o[n]);
-          e._i.push([i, s, a]);
-        },
-        e.__SV = 1
+          for (n = 0; n < o.length; n++) g(u, o[n]); e._i.push([i, s, a]);
+        }, e.__SV = 1
       );
     })(document, window.posthog || []);
     window.posthog.init(POSTHOG_KEY, { api_host: POSTHOG_HOST, capture_pageview: false, persistence: "localStorage" });
@@ -428,12 +403,7 @@ async function sendEmail({ to, subject, body }) {
       const res = await fetch("https://api.emailjs.com/api/v1.0/email/send", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          service_id: EMAILJS_SERVICE_ID,
-          template_id: EMAILJS_TEMPLATE_ID,
-          user_id: EMAILJS_PUBLIC_KEY,
-          template_params: { to_email: to, subject, message: body },
-        }),
+        body: JSON.stringify({ service_id: EMAILJS_SERVICE_ID, template_id: EMAILJS_TEMPLATE_ID, user_id: EMAILJS_PUBLIC_KEY, template_params: { to_email: to, subject, message: body } }),
       });
       if (!res.ok) throw new Error("EmailJS send failed");
       return { ok: true };
@@ -1271,31 +1241,13 @@ function StripeCheckoutModal({ plan, user, onClose, onSuccess }) {
     if (!name.trim()) { setError("Name on card is required."); return; }
     if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setError("A valid email is required."); return; }
     if (!stripe || !elements) { setError("Stripe is not loaded yet. Please wait."); return; }
-
     setProcessing(true);
     setError("");
-
     try {
       const cardElement = elements.getElement("card");
-      const { paymentMethod, error: pmError } = await stripe.createPaymentMethod({
-        type: "card",
-        card: cardElement,
-        billing_details: { name, email },
-      });
+      const { paymentMethod, error: pmError } = await stripe.createPaymentMethod({ type: "card", card: cardElement, billing_details: { name, email } });
       if (pmError) throw new Error(pmError.message);
-
-      const record = {
-        id: "pm_" + paymentMethod.id,
-        plan_id: plan.id,
-        plan_name: plan.name,
-        amount: plan.price,
-        interval: plan.interval,
-        status: "succeeded",
-        card_brand: paymentMethod.card.brand,
-        card_last4: paymentMethod.card.last4,
-        created_at: new Date().toISOString(),
-        email,
-      };
+      const record = { id: "pm_" + paymentMethod.id, plan_id: plan.id, plan_name: plan.name, amount: plan.price, interval: plan.interval, status: "succeeded", card_brand: paymentMethod.card.brand, card_last4: paymentMethod.card.last4, created_at: new Date().toISOString(), email };
       savePayment(record);
       trackEvent("payment_completed", { plan_id: plan.id, plan_name: plan.name, amount: plan.price });
       onSuccess(record);
@@ -1381,7 +1333,6 @@ function Billing({ user, onToast }) {
     <div className="section">
       <div className="section-header"><h2>Plans & Billing</h2></div>
       <p className="section-desc">Upgrade to Pro for unlimited destinations, AI tips, travel connections, and more.</p>
-
       <div className="pricing-grid">
         {PLANS.map(plan => {
           const isCurrent = currentPlan === plan.id;
@@ -1403,12 +1354,7 @@ function Billing({ user, onToast }) {
                 ) : plan.price === 0 ? (
                   <div className="plan-current" style={{ background: "var(--color-background)", color: "var(--color-text-light)", borderColor: "var(--color-border)" }}>Free Tier</div>
                 ) : (
-                  <button
-                    className="btn btn-primary w-full"
-                    onClick={() => { setCheckoutPlan(plan); trackEvent("checkout_initiated", { plan_id: plan.id }); }}
-                    aria-label={`Subscribe to ${plan.name} for ${planMeta(plan)}`}
-                    title={`Subscribe to ${plan.name}`}
-                  >
+                  <button className="btn btn-primary w-full" onClick={() => { setCheckoutPlan(plan); trackEvent("checkout_initiated", { plan_id: plan.id }); }} aria-label={`Subscribe to ${plan.name} for ${planMeta(plan)}`} title={`Subscribe to ${plan.name}`}>
                     {plan.interval ? "Subscribe" : "Buy Now"}
                   </button>
                 )}
@@ -1417,7 +1363,6 @@ function Billing({ user, onToast }) {
           );
         })}
       </div>
-
       <div className="payment-section">
         <h3>Payment History</h3>
         {payments.length === 0 ? (
@@ -1428,15 +1373,11 @@ function Billing({ user, onToast }) {
               <div key={p.id} className="order-row">
                 <div>
                   <div style={{ fontWeight: 600, fontSize: ".875rem" }}>{p.plan_name}</div>
-                  <div style={{ fontSize: ".78rem", color: "var(--color-text-light)" }}>
-                    {fmt(p.created_at)} · {p.card_brand} ···· {p.card_last4}
-                  </div>
+                  <div style={{ fontSize: ".78rem", color: "var(--color-text-light)" }}>{fmt(p.created_at)} · {p.card_brand} ···· {p.card_last4}</div>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: ".5rem" }}>
                   <span className={cls("badge", p.status === "succeeded" ? "badge-visited" : p.status === "canceled" ? "badge-canceled" : "badge-planned")}>{p.status}</span>
-                  <span className={cls("order-amount", p.amount < 0 && "order-amount-refund")}>
-                    {p.amount < 0 ? "-" : ""}${Math.abs(p.amount).toFixed(2)}
-                  </span>
+                  <span className={cls("order-amount", p.amount < 0 && "order-amount-refund")}>{p.amount < 0 ? "-" : ""}${Math.abs(p.amount).toFixed(2)}</span>
                 </div>
               </div>
             ))}
@@ -1447,32 +1388,20 @@ function Billing({ user, onToast }) {
           <span className="stripe-badge">🔒 Payments processed securely by Stripe. WanderSafe never stores card data.</span>
         </div>
       </div>
-
-      {checkoutPlan && (
-        <StripeCheckoutModal
-          plan={checkoutPlan}
-          user={user}
-          onClose={() => setCheckoutPlan(null)}
-          onSuccess={handleSuccess}
-        />
-      )}
+      {checkoutPlan && <StripeCheckoutModal plan={checkoutPlan} user={user} onClose={() => setCheckoutPlan(null)} onSuccess={handleSuccess} />}
     </div>
   );
 }
 
 // ---- Analytics Dashboard ----
-// Summarises in-session events captured by trackEvent().
-// If PostHog is configured, users can also view their PostHog dashboard via the link.
 function AnalyticsDashboard() {
   const [, forceRender] = useState(0);
 
-  // Refresh every 5 s so counts update if user acts in another tab
   useEffect(() => {
     const interval = setInterval(() => forceRender(n => n + 1), 5000);
     return () => clearInterval(interval);
   }, []);
 
-  // Aggregate counts per event name
   const counts = {};
   for (const ev of _analyticsEvents) {
     counts[ev.name] = (counts[ev.name] || 0) + 1;
@@ -1481,32 +1410,16 @@ function AnalyticsDashboard() {
   const uniqueEventNames = Object.keys(counts).length;
   const sessionStart = _analyticsEvents.length > 0 ? _analyticsEvents[0].ts : null;
   const sessionMins = sessionStart ? Math.max(1, Math.round((Date.now() - sessionStart) / 60000)) : 0;
-
-  // Sorted by count descending
   const sortedEvents = Object.entries(counts).sort((a, b) => b[1] - a[1]);
   const maxCount = sortedEvents.length > 0 ? sortedEvents[0][1] : 1;
 
-  // Friendly labels
   const EVENT_LABELS = {
-    user_signed_in: "Sign-ins",
-    user_signed_up: "Sign-ups",
-    destination_added: "Destinations added",
-    destination_deleted: "Destinations deleted",
-    safety_review_submitted: "Safety reviews submitted",
-    ai_tips_requested: "AI tips requested",
-    ai_tips_received: "AI tips received",
-    ai_tips_error: "AI tips errors",
-    packing_list_created: "Packing lists created",
-    packing_list_deleted: "Packing lists deleted",
-    packing_item_added: "Packing items added",
-    connection_posted: "Connection posts",
-    location_sharing_started: "Location sharing started",
-    location_sharing_stopped: "Location sharing stopped",
-    emergency_alert_triggered: "Emergency alerts triggered",
-    checkout_initiated: "Checkout initiated",
-    payment_completed: "Payments completed",
-    payment_failed: "Payment failures",
-    tab_viewed: "Screen views",
+    user_signed_in: "Sign-ins", user_signed_up: "Sign-ups", destination_added: "Destinations added", destination_deleted: "Destinations deleted",
+    safety_review_submitted: "Safety reviews submitted", ai_tips_requested: "AI tips requested", ai_tips_received: "AI tips received",
+    ai_tips_error: "AI tips errors", packing_list_created: "Packing lists created", packing_list_deleted: "Packing lists deleted",
+    packing_item_added: "Packing items added", connection_posted: "Connection posts", location_sharing_started: "Location sharing started",
+    location_sharing_stopped: "Location sharing stopped", emergency_alert_triggered: "Emergency alerts triggered",
+    checkout_initiated: "Checkout initiated", payment_completed: "Payments completed", payment_failed: "Payment failures", tab_viewed: "Screen views",
   };
 
   const posthogConfigured = Boolean(POSTHOG_KEY);
@@ -1515,55 +1428,24 @@ function AnalyticsDashboard() {
     <div className="section">
       <div className="section-header">
         <h2>Analytics</h2>
-        {posthogConfigured && (
-          <a
-            href="https://app.posthog.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn btn-ghost"
-            title="Open PostHog dashboard"
-            aria-label="Open PostHog dashboard"
-          >
-            PostHog ↗
-          </a>
-        )}
+        {posthogConfigured && <a href="https://app.posthog.com" target="_blank" rel="noopener noreferrer" className="btn btn-ghost" title="Open PostHog dashboard" aria-label="Open PostHog dashboard">PostHog ↗</a>}
       </div>
-
       <div className="analytics-provider">
-        📊 {posthogConfigured
-          ? "Events are being sent to PostHog and recorded in this session."
-          : "Session analytics only. Configure PostHog key to persist data across sessions."}
+        📊 {posthogConfigured ? "Events are being sent to PostHog and recorded in this session." : "Session analytics only. Configure PostHog key to persist data across sessions."}
       </div>
-
       {!posthogConfigured && (
         <div className="tip-box" style={{ marginBottom: "1rem" }}>
           <strong>To enable PostHog:</strong> set <code>POSTHOG_KEY</code> in App.jsx to your project API key from{" "}
-          <a href="https://app.posthog.com" target="_blank" rel="noopener noreferrer">app.posthog.com</a>.
-          It's free for up to 1 million events/month.
+          <a href="https://app.posthog.com" target="_blank" rel="noopener noreferrer">app.posthog.com</a>. It's free for up to 1 million events/month.
         </div>
       )}
-
       <div className="analytics-grid">
-        <div className="analytics-stat">
-          <div className="analytics-stat-value">{totalEvents}</div>
-          <div className="analytics-stat-label">Total events</div>
-        </div>
-        <div className="analytics-stat">
-          <div className="analytics-stat-value">{uniqueEventNames}</div>
-          <div className="analytics-stat-label">Event types</div>
-        </div>
-        <div className="analytics-stat">
-          <div className="analytics-stat-value">{sessionMins}</div>
-          <div className="analytics-stat-label">Session mins</div>
-        </div>
-        <div className="analytics-stat">
-          <div className="analytics-stat-value">{counts["tab_viewed"] || 0}</div>
-          <div className="analytics-stat-label">Screen views</div>
-        </div>
+        <div className="analytics-stat"><div className="analytics-stat-value">{totalEvents}</div><div className="analytics-stat-label">Total events</div></div>
+        <div className="analytics-stat"><div className="analytics-stat-value">{uniqueEventNames}</div><div className="analytics-stat-label">Event types</div></div>
+        <div className="analytics-stat"><div className="analytics-stat-value">{sessionMins}</div><div className="analytics-stat-label">Session mins</div></div>
+        <div className="analytics-stat"><div className="analytics-stat-value">{counts["tab_viewed"] || 0}</div><div className="analytics-stat-label">Screen views</div></div>
       </div>
-
       <h3 style={{ fontSize: "1rem", fontWeight: 600, marginBottom: ".75rem" }}>Event Breakdown</h3>
-
       {sortedEvents.length === 0 ? (
         <EmptyState icon="📊" title="No events yet" body="Interact with the app and events will appear here." />
       ) : (
@@ -1571,15 +1453,12 @@ function AnalyticsDashboard() {
           {sortedEvents.map(([name, count]) => (
             <div key={name} className="analytics-event-row">
               <span className="analytics-event-name">{EVENT_LABELS[name] || name}</span>
-              <div className="analytics-bar-wrap">
-                <div className="analytics-bar" style={{ width: `${(count / maxCount) * 100}%` }} />
-              </div>
+              <div className="analytics-bar-wrap"><div className="analytics-bar" style={{ width: `${(count / maxCount) * 100}%` }} /></div>
               <span className="analytics-event-count">{count}</span>
             </div>
           ))}
         </div>
       )}
-
       <p className="hint" style={{ marginTop: "1.25rem" }}>
         Analytics data is collected to improve WanderSafe. No personally identifiable information is included in events. See our <button className="link-btn" onClick={() => window.dispatchEvent(new CustomEvent("showPrivacy"))}>Privacy Policy</button> for details.
       </p>
@@ -1594,11 +1473,7 @@ function NotificationsSettings({ user, onToast }) {
   const [sending, setSending] = useState(false);
   const [emailError, setEmailError] = useState("");
 
-  function update(key, value) {
-    setPrefs(p => ({ ...p, [key]: value }));
-    setSaved(false);
-  }
-
+  function update(key, value) { setPrefs(p => ({ ...p, [key]: value })); setSaved(false); }
   function validateEmail(email) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email); }
 
   function save(e) {
@@ -1717,9 +1592,7 @@ function Settings({ user, onToast }) {
           <button className="btn btn-danger" onClick={deleteAccount} disabled={deleting}>{deleting ? <Spinner size={14} /> : "Delete Account & All Data"}</button>
         </div>
       </div>
-
       <NotificationsSettings user={user} onToast={onToast} />
-
       <div className="card" style={{ marginTop: "1rem" }}>
         <h3>Data & Privacy</h3>
         <p className="hint">All your data is stored securely and never shared with third parties. Deleting your account removes all data after a 30-day grace period.</p>
@@ -1801,7 +1674,6 @@ function App() {
 
   function showToast(msg, type = "success") { setToast({ msg, type }); }
 
-  // Initialise PostHog once on mount
   useEffect(() => { initPostHog(); }, []);
 
   useEffect(() => {
@@ -1823,7 +1695,6 @@ function App() {
     return () => { window.removeEventListener("showPrivacy", p); window.removeEventListener("showTos", t); };
   }, []);
 
-  // Track tab (screen) views
   useEffect(() => {
     localStorage.setItem("ws_tab", tab);
     trackEvent("tab_viewed", { tab });
